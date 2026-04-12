@@ -96,9 +96,7 @@ For each commit:
 
 ```bash
 git commit -m "$(cat <<'EOF'
-type(scope): emoji description
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+type scope emoji: description
 EOF
 )"
 ```
