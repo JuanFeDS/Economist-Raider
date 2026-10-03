@@ -112,6 +112,13 @@ def index():
     return send_from_directory(app.static_folder, "index.html")
 
 
+@app.route("/config.js")
+def configuracion_cliente():
+    """Entrega al navegador la URL y la anon key de Supabase leídas del .env."""
+    configuracion = {"SUPABASE_URL": SUPABASE_URL, "SUPABASE_ANON_KEY": SUPABASE_ANON_KEY}
+    return Response(f"window.APP_CONFIG = {json.dumps(configuracion)};", mimetype="application/javascript")
+
+
 @app.route("/api/extraer", methods=["POST"])
 @requiere_autenticacion
 def extraer():
