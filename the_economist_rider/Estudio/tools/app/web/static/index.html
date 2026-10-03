@@ -1,0 +1,1981 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sala de lectura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --papel: #FCFCFA;
+    --papel-alto: #F4F3EF;
+    --tinta: #1C1B18;
+    --tinta-suave: #57544C;
+    --acento: #B23A2E;
+    --linea: #E7E4DC;
+    --gris-prensa: #78756C;
+    --fuente-display: "Fraunces", serif;
+    --fuente-cuerpo: "Newsreader", serif;
+    --fuente-mono: "JetBrains Mono", monospace;
+    --ancho-lectura: 42em;
+    --escala-texto: 1.05rem;
+    --sombra-suave: 0 1px 2px rgba(20,18,15,0.04), 0 14px 28px -18px rgba(20,18,15,0.18);
+    --sombra-tenue: 0 1px 2px rgba(20,18,15,0.04), 0 6px 14px -10px rgba(20,18,15,0.16);
+  }
+
+  html[data-modo="papel"] {
+    --papel: #F5EAE0;
+    --papel-alto: #EEDFD0;
+    --tinta: #241F1A;
+    --tinta-suave: #55483C;
+    --acento: #B23A2E;
+    --linea: #DBC7B2;
+    --gris-prensa: #7A6C5A;
+    --sombra-suave: 0 1px 2px rgba(36,31,26,0.06), 0 14px 28px -16px rgba(36,31,26,0.35);
+    --sombra-tenue: 0 1px 2px rgba(36,31,26,0.05), 0 6px 14px -8px rgba(36,31,26,0.3);
+  }
+
+  html[data-modo="azul"] {
+    --papel: #F8FAFD;
+    --papel-alto: #EBF1FA;
+    --tinta: #172B4D;
+    --tinta-suave: #4C5D7A;
+    --acento: #2457C5;
+    --linea: #DCE6F2;
+    --gris-prensa: #6B7A94;
+    --sombra-suave: 0 1px 2px rgba(23,43,77,0.06), 0 14px 28px -16px rgba(23,43,77,0.25);
+    --sombra-tenue: 0 1px 2px rgba(23,43,77,0.05), 0 6px 14px -8px rgba(23,43,77,0.2);
+  }
+
+  html[data-modo="terminal"] {
+    --papel: #0B0D09;
+    --papel-alto: #14170F;
+    --tinta: #EAE3D3;
+    --tinta-suave: #B9AF98;
+    --acento: #E8A23D;
+    --linea: #2B2E20;
+    --gris-prensa: #8A8168;
+    --sombra-suave: 0 1px 2px rgba(0,0,0,0.4), 0 16px 32px -16px rgba(0,0,0,0.7);
+    --sombra-tenue: 0 1px 2px rgba(0,0,0,0.35), 0 8px 16px -10px rgba(0,0,0,0.6);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: var(--papel);
+    color: var(--tinta);
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  body {
+    font-family: var(--fuente-cuerpo);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  button { font-family: inherit; cursor: pointer; }
+
+  /* ---------- Masthead ---------- */
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 16px 28px;
+    flex-wrap: wrap;
+    background: var(--papel-alto);
+    flex-shrink: 0;
+  }
+
+  .marca {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .marca-bullet {
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    background: var(--acento);
+    flex-shrink: 0;
+    transform: rotate(45deg);
+  }
+
+  .marca-textos {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+  }
+
+  .marca-titulo {
+    font-family: var(--fuente-display);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 1.08rem;
+    color: var(--tinta);
+  }
+
+  .marca-subtitulo {
+    font-family: var(--fuente-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gris-prensa);
+  }
+
+  .controles-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  input[type="file"] { display: none; }
+
+  /* Botón primario: pastilla sólida */
+
+  .boton-primario {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--fuente-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--tinta);
+    color: var(--papel);
+    border: none;
+    border-radius: 999px;
+    padding: 10px 18px;
+    box-shadow: var(--sombra-tenue);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  }
+  .boton-primario:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--sombra-suave); }
+  .boton-primario:active:not(:disabled) { transform: translateY(0); }
+  .boton-primario:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; transform: none; }
+
+  #botonTraducir { margin-bottom: 28px; }
+
+  /* Selector de idioma: pastilla segmentada con indicador deslizante */
+
+  .segmentado {
+    position: relative;
+    display: inline-flex;
+    background: color-mix(in srgb, var(--tinta) 8%, transparent);
+    border-radius: 999px;
+    padding: 3px;
+  }
+
+  .segmentado-indicador {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 38px;
+    height: calc(100% - 6px);
+    border-radius: 999px;
+    background: var(--acento);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .segmentado button {
+    position: relative;
+    z-index: 1;
+    width: 38px;
+    padding: 6px 0;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    font-family: var(--fuente-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    color: var(--tinta-suave);
+    transition: color 0.2s ease;
+  }
+  .segmentado button.activo { color: var(--papel); }
+  .segmentado button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Selector de paleta: muestras circulares */
+
+  .selector-paleta {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .muestra-paleta {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    padding: 0;
+    border: none;
+    box-shadow: 0 0 0 1px var(--linea);
+    background: conic-gradient(var(--sw-fondo) 0deg 180deg, var(--sw-acento) 180deg 360deg);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .muestra-paleta:hover { transform: scale(1.18); }
+  .muestra-paleta.activo { box-shadow: 0 0 0 2px var(--papel), 0 0 0 3.5px var(--tinta); }
+
+  /* ---------- Biblioteca lateral ---------- */
+
+  #cuerpoApp {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    overflow: hidden;
+  }
+
+  aside#biblioteca {
+    flex-shrink: 0;
+    width: 230px;
+    overflow-y: auto;
+    border-right: 1px solid var(--linea);
+    background: var(--papel-alto);
+    padding: 22px 12px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--linea) transparent;
+  }
+
+  .biblioteca-titulo {
+    font-family: var(--fuente-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gris-prensa);
+    margin: 0 10px 14px;
+  }
+
+  .biblioteca-vacia {
+    font-size: 0.82rem;
+    color: var(--gris-prensa);
+    padding: 6px 10px;
+    line-height: 1.5;
+  }
+
+  .categoria-grupo { margin-bottom: 4px; }
+
+  .categoria-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 7px 10px;
+    font-family: var(--fuente-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gris-prensa);
+    border-radius: 8px;
+  }
+  .categoria-header:hover { background: color-mix(in srgb, var(--tinta) 5%, transparent); }
+
+  .categoria-chevron {
+    display: inline-flex;
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+  }
+  .categoria-grupo.colapsada .categoria-chevron { transform: rotate(-90deg); }
+  .categoria-grupo.colapsada .categoria-documentos { display: none; }
+
+  .categoria-nombre { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .categoria-cuenta { color: var(--gris-prensa); opacity: 0.7; }
+
+  .categoria-documentos {
+    margin-left: 15px;
+    padding-left: 8px;
+    border-left: 1px solid var(--linea);
+  }
+
+  .documento-item {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+    padding: 1px 4px;
+    margin-bottom: 2px;
+    border-radius: 10px;
+    color: var(--tinta-suave);
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .documento-item:hover { background: color-mix(in srgb, var(--tinta) 6%, transparent); }
+  .documento-item.activo {
+    background: color-mix(in srgb, var(--acento) 14%, transparent);
+    color: var(--tinta);
+  }
+  .documento-item.activo .documento-abrir { font-weight: 600; }
+
+  .documento-abrir {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    padding: 8px 4px;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-family: var(--fuente-cuerpo);
+    font-size: 0.85rem;
+  }
+
+  .documento-abrir .nombre-doc {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+
+  .documento-abrir .punto-traducido {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--acento);
+    flex-shrink: 0;
+  }
+
+  .documento-acciones {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+    width: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: width 0.15s ease, opacity 0.15s ease;
+  }
+  .documento-item:hover .documento-acciones,
+  .documento-item:focus-within .documento-acciones { width: 78px; opacity: 1; }
+
+  .accion-doc {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--gris-prensa);
+  }
+  .accion-doc:hover { background: color-mix(in srgb, var(--tinta) 10%, transparent); color: var(--acento); }
+
+  .documento-nombre-input {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--fuente-cuerpo);
+    font-size: 0.85rem;
+    color: var(--tinta);
+    background: var(--papel);
+    border: 1px solid var(--acento);
+    border-radius: 6px;
+    padding: 4px 6px;
+  }
+
+  @media (max-width: 720px) {
+    aside#biblioteca { display: none; }
+  }
+
+  /* ---------- Panel de notas ---------- */
+
+  aside#panelNotas {
+    flex-shrink: 0;
+    width: 260px;
+    overflow-y: auto;
+    border-left: 1px solid var(--linea);
+    background: var(--papel-alto);
+    padding: 22px 14px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--linea) transparent;
+  }
+
+  .panel-notas-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .panel-notas-header .biblioteca-titulo { margin: 0; }
+
+  .boton-exportar {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--gris-prensa);
+  }
+  .boton-exportar:hover { background: color-mix(in srgb, var(--tinta) 10%, transparent); color: var(--acento); }
+
+  .nota-item {
+    padding: 12px 11px;
+    margin-bottom: 10px;
+    border-left: 2px solid var(--acento);
+    border-radius: 0 10px 10px 0;
+    background: color-mix(in srgb, var(--acento) 7%, transparent);
+    transition: background 0.4s ease;
+  }
+  .nota-item.destacada { background: color-mix(in srgb, var(--acento) 22%, transparent); }
+
+  .nota-cita {
+    font-family: var(--fuente-cuerpo);
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--tinta);
+    margin: 0 0 8px;
+    line-height: 1.45;
+  }
+
+  .nota-comentario {
+    font-size: 0.78rem;
+    color: var(--tinta-suave);
+    margin: 0 0 8px;
+    line-height: 1.4;
+    cursor: text;
+  }
+  .nota-comentario:empty::before {
+    content: "Agregar un comentario…";
+    color: var(--gris-prensa);
+  }
+
+  .nota-comentario-input {
+    display: block;
+    width: 100%;
+    font-family: var(--fuente-cuerpo);
+    font-size: 0.78rem;
+    color: var(--tinta);
+    background: var(--papel);
+    border: 1px solid var(--linea);
+    border-radius: 8px;
+    padding: 6px 8px;
+    resize: vertical;
+    min-height: 44px;
+    margin-bottom: 8px;
+  }
+  .nota-comentario-input:focus { outline: none; border-color: var(--acento); }
+
+  .nota-pie {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+  }
+
+  .nota-ir, .nota-borrar {
+    font-family: var(--fuente-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: transparent;
+    border: none;
+    color: var(--gris-prensa);
+    padding: 4px 8px;
+    border-radius: 999px;
+  }
+  .nota-ir:hover, .nota-borrar:hover { color: var(--acento); background: color-mix(in srgb, var(--tinta) 8%, transparent); }
+
+  @media (max-width: 960px) {
+    aside#panelNotas { display: none; }
+  }
+
+  /* ---------- Subrayados en el texto ---------- */
+
+  .subrayado-texto {
+    background: color-mix(in srgb, var(--acento) 32%, transparent);
+    color: inherit;
+    border-radius: 3px;
+    padding: 0 1px;
+    cursor: pointer;
+  }
+
+  .popover-subrayado {
+    position: fixed;
+    transform: translate(-50%, -100%);
+    display: none;
+    z-index: 60;
+  }
+  .popover-subrayado.visible { display: block; }
+  .popover-subrayado button {
+    font-family: var(--fuente-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: var(--tinta);
+    color: var(--papel);
+    border: none;
+    border-radius: 999px;
+    padding: 8px 16px;
+    box-shadow: var(--sombra-suave);
+    white-space: nowrap;
+  }
+
+  /* ---------- Pantalla de login ---------- */
+
+  .pantalla-login {
+    position: fixed;
+    inset: 0;
+    background: var(--papel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 24px;
+  }
+
+  .pantalla-login .modal-tarjeta { max-width: 340px; }
+
+  .login-mensaje {
+    font-size: 0.8rem;
+    color: var(--gris-prensa);
+    margin: 12px 0 0;
+    text-align: center;
+    line-height: 1.4;
+  }
+  .login-mensaje.exito { color: var(--acento); }
+
+  /* ---------- Modal de categoría ---------- */
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 9, 7, 0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 24px;
+  }
+  .modal-overlay.visible { display: flex; }
+
+  .modal-tarjeta {
+    width: 100%;
+    max-width: 320px;
+    background: var(--papel);
+    border-radius: 18px;
+    padding: 26px;
+    box-shadow: var(--sombra-suave);
+  }
+
+  .modal-titulo {
+    font-family: var(--fuente-display);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: var(--tinta);
+    margin: 0 0 4px;
+  }
+
+  .modal-subtitulo {
+    font-size: 0.8rem;
+    color: var(--gris-prensa);
+    margin: 0 0 16px;
+  }
+
+  .modal-input {
+    width: 100%;
+    font-family: var(--fuente-cuerpo);
+    font-size: 0.95rem;
+    padding: 10px 13px;
+    border: 1px solid var(--linea);
+    border-radius: 10px;
+    background: var(--papel-alto);
+    color: var(--tinta);
+    margin-bottom: 14px;
+  }
+  .modal-input:focus { outline: none; border-color: var(--acento); }
+
+  .modal-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 22px;
+    min-height: 24px;
+  }
+
+  .chip-categoria {
+    font-family: var(--fuente-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: none;
+    background: var(--papel-alto);
+    color: var(--tinta-suave);
+  }
+  .chip-categoria:hover { background: color-mix(in srgb, var(--acento) 16%, transparent); color: var(--acento); }
+
+  .modal-acciones {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .boton-fantasma {
+    font-family: var(--fuente-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: transparent;
+    border: none;
+    color: var(--gris-prensa);
+    padding: 10px 14px;
+    border-radius: 999px;
+  }
+  .boton-fantasma:hover { color: var(--tinta); }
+
+  /* ---------- Zona vacía ---------- */
+
+  main {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 24px;
+    overflow-y: auto;
+  }
+
+  .bandeja {
+    width: 100%;
+    max-width: 640px;
+    margin-top: 8vh;
+    background: var(--papel-alto);
+    border-radius: 22px;
+    padding: 56px 40px;
+    text-align: center;
+    color: var(--gris-prensa);
+    box-shadow: var(--sombra-suave);
+    transition: box-shadow 0.2s ease;
+  }
+  .bandeja.arrastrando { box-shadow: 0 0 0 2px var(--acento), var(--sombra-suave); }
+
+  .bandeja .indicador {
+    font-family: var(--fuente-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--acento);
+    margin-bottom: 18px;
+    display: inline-block;
+  }
+
+  .bandeja .indicador::before { content: "● "; }
+  .bandeja .indicador.activo::before { animation: parpadeo 1s steps(1) infinite; }
+
+  @keyframes parpadeo { 50% { opacity: 0.15; } }
+
+  .telex { display: inline-flex; gap: 3px; margin-left: 2px; }
+  .telex span {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--acento);
+    animation: rebote 1.1s ease-in-out infinite;
+  }
+  .telex span:nth-child(2) { animation-delay: 0.15s; }
+  .telex span:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes rebote {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  .bandeja h1 {
+    font-family: var(--fuente-display);
+    font-weight: 500;
+    font-style: italic;
+    font-size: 1.6rem;
+    margin: 0 0 10px;
+    color: var(--tinta);
+  }
+
+  .bandeja p { margin: 0 0 24px; font-size: 0.95rem; }
+
+  /* ---------- Artículo ---------- */
+
+  article {
+    width: 100%;
+    max-width: var(--ancho-lectura);
+    display: none;
+    height: 100%;
+    min-height: 0;
+    flex-direction: column;
+  }
+  article.visible { display: flex; }
+
+  article.visible > * { flex-shrink: 0; }
+
+  .metadata-articulo {
+    font-family: var(--fuente-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gris-prensa);
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 44px 0 10px;
+    border-bottom: 1px solid var(--linea);
+    padding-bottom: 14px;
+  }
+
+  h1.titular {
+    font-family: var(--fuente-display);
+    font-weight: 700;
+    font-size: 2.1rem;
+    line-height: 1.15;
+    margin: 4px 0 24px;
+    overflow-wrap: anywhere;
+  }
+
+  .cuerpo-texto {
+    font-size: var(--escala-texto);
+    line-height: 1.7;
+    color: var(--tinta);
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overflow-wrap: anywhere;
+    padding-bottom: 64px;
+    padding-right: 18px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--linea) transparent;
+  }
+
+  .cuerpo-texto::-webkit-scrollbar { width: 8px; }
+  .cuerpo-texto::-webkit-scrollbar-track { background: transparent; }
+  .cuerpo-texto::-webkit-scrollbar-thumb {
+    background: var(--linea);
+    border-radius: 999px;
+  }
+  .cuerpo-texto::-webkit-scrollbar-thumb:hover { background: var(--gris-prensa); }
+
+  .cuerpo-texto p { margin: 0 0 1.3em; transition: opacity 0.6s ease, color 0.6s ease; }
+
+  .cuerpo-texto p.pendiente { opacity: 0.35; }
+
+  .cuerpo-texto p.titulo-detectado {
+    font-family: var(--fuente-display);
+    font-weight: 700;
+    font-size: 1.3em;
+    line-height: 1.3;
+    margin: 1.5em 0 0.6em;
+    color: var(--tinta);
+  }
+  .cuerpo-texto p.titulo-detectado:first-child { margin-top: 0; }
+
+  .cuerpo-texto p.recien-traducido { animation: destello-parrafo 1.1s ease; }
+  @keyframes destello-parrafo {
+    0% { color: var(--acento); opacity: 1; }
+    100% { color: var(--tinta); opacity: 1; }
+  }
+
+  .cuerpo-texto p:first-of-type::first-letter {
+    font-family: var(--fuente-display);
+    font-weight: 700;
+    font-size: 3.4em;
+    float: left;
+    line-height: 0.85;
+    padding: 0.05em 0.08em 0 0;
+    color: var(--acento);
+  }
+
+  .cuerpo-texto p.titulo-detectado:first-of-type::first-letter {
+    font-family: inherit;
+    font-weight: inherit;
+    font-size: inherit;
+    float: none;
+    line-height: inherit;
+    padding: 0;
+    color: inherit;
+  }
+
+  .cuerpo-texto p.separador-pagina {
+    text-align: center;
+    color: var(--gris-prensa);
+    font-family: var(--fuente-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    margin: 2em 0;
+  }
+
+  /* ---------- Barra de traducción ---------- */
+
+  .barra-traduccion {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 22px 0 30px;
+    padding-left: 14px;
+    border-left: 3px solid var(--acento);
+    font-family: var(--fuente-mono);
+  }
+
+  .barra-traduccion .estado-texto {
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+    color: var(--gris-prensa);
+    white-space: nowrap;
+  }
+
+  .cinta-progreso {
+    flex: 0 1 160px;
+    height: 4px;
+    background: var(--linea);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .cinta-progreso .relleno {
+    height: 100%;
+    width: 0%;
+    background: repeating-linear-gradient(
+      45deg,
+      var(--acento) 0 8px,
+      color-mix(in srgb, var(--acento) 70%, transparent) 8px 16px
+    );
+    background-size: 32px 32px;
+    transition: width 0.4s ease;
+    animation: desplazar-rayas 0.9s linear infinite;
+  }
+
+  @keyframes desplazar-rayas { to { background-position: 32px 0; } }
+
+  .barra-traduccion .contador-parrafos {
+    font-size: 0.66rem;
+    color: var(--gris-prensa);
+    white-space: nowrap;
+  }
+
+  /* ---------- Controles de lectura flotantes ---------- */
+
+  .controles-lectura {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: var(--papel-alto);
+    border-radius: 999px;
+    padding: 6px;
+    box-shadow: var(--sombra-suave);
+  }
+  .controles-lectura button {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--tinta-suave);
+    font-family: var(--fuente-mono);
+    font-size: 0.85rem;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .controles-lectura button:hover {
+    background: color-mix(in srgb, var(--acento) 15%, transparent);
+    color: var(--acento);
+  }
+
+  @media (max-width: 640px) {
+    h1.titular { font-size: 1.6rem; }
+    .cuerpo-texto p:first-of-type::first-letter { font-size: 2.6em; }
+    .marca-subtitulo { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="pantalla-login" id="pantallaLogin">
+  <div class="modal-tarjeta">
+    <p class="modal-titulo">Sala de lectura</p>
+    <p class="modal-subtitulo">Ingresa tu correo y te mandamos un link para entrar. Sin contraseña.</p>
+    <input type="email" class="modal-input" id="inputCorreoLogin" placeholder="tu@correo.com" autocomplete="email">
+    <button class="boton-primario" id="botonEnviarLink" style="width:100%; justify-content:center;">Enviar link mágico</button>
+    <p class="login-mensaje" id="mensajeLogin"></p>
+  </div>
+</div>
+
+<header>
+  <div class="marca">
+    <span class="marca-bullet"></span>
+    <div class="marca-textos">
+      <span class="marca-titulo">Sala de lectura</span>
+      <span class="marca-subtitulo">The Economist Rider</span>
+    </div>
+  </div>
+  <div class="controles-header">
+    <label class="boton-primario" for="entradaPdf">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V3M8 3L4.5 6.5M8 3l3.5 3.5"/><path d="M2.5 11v1.5A1.5 1.5 0 0 0 4 14h8a1.5 1.5 0 0 0 1.5-1.5V11"/></svg>
+      Cargar PDF
+    </label>
+    <input type="file" id="entradaPdf" accept="application/pdf">
+
+    <div class="segmentado" id="toggleIdioma" style="display:none">
+      <div class="segmentado-indicador" id="indicadorIdioma"></div>
+      <button data-idioma="en" class="activo">EN</button>
+      <button data-idioma="es" disabled>ES</button>
+    </div>
+
+    <div class="selector-paleta" id="selectorPaleta">
+      <button class="muestra-paleta activo" data-paleta="blanco" style="--sw-fondo:#FCFCFA; --sw-acento:#B23A2E;" aria-label="Paleta Blanco" title="Blanco"></button>
+      <button class="muestra-paleta" data-paleta="papel" style="--sw-fondo:#F5EAE0; --sw-acento:#B23A2E;" aria-label="Paleta Papel" title="Papel"></button>
+      <button class="muestra-paleta" data-paleta="azul" style="--sw-fondo:#F8FAFD; --sw-acento:#2457C5;" aria-label="Paleta Azul" title="Azul"></button>
+      <button class="muestra-paleta" data-paleta="terminal" style="--sw-fondo:#0B0D09; --sw-acento:#E8A23D;" aria-label="Paleta Terminal" title="Terminal"></button>
+    </div>
+  </div>
+</header>
+
+<div id="cuerpoApp">
+  <aside id="biblioteca">
+    <div class="biblioteca-titulo">Biblioteca</div>
+    <div id="listaDocumentos">
+      <p class="biblioteca-vacia">Todavía no hay lecturas cargadas.</p>
+    </div>
+  </aside>
+
+  <main>
+    <div class="bandeja" id="bandeja">
+      <span class="indicador" id="indicadorBandeja">Instrumento listo</span>
+      <h1 id="tituloBandeja">Ninguna edición cargada</h1>
+      <p id="mensajeBandeja">Arrastra un PDF aquí, o usa "Cargar PDF" arriba.<br>Se extrae el texto y puedes traducirlo del inglés al español.</p>
+    </div>
+
+    <article id="articulo">
+      <div class="metadata-articulo">
+        <span id="metaPalabras"></span>
+        <span id="metaIdioma"></span>
+      </div>
+      <h1 class="titular" id="tituloArticulo"></h1>
+
+      <div class="barra-traduccion" id="barraTraduccion" style="display:none">
+        <span class="estado-texto" id="estadoTraduccion">Iniciando…</span>
+        <div class="cinta-progreso"><div class="relleno" id="rellenoProgreso"></div></div>
+        <span class="contador-parrafos" id="contadorParrafos"></span>
+        <span class="estado-texto" id="porcentajeTraduccion">0%</span>
+      </div>
+
+      <button class="boton-primario" id="botonTraducir">Traducir al español</button>
+
+      <div class="cuerpo-texto" id="cuerpoTexto"></div>
+    </article>
+  </main>
+
+  <aside id="panelNotas">
+    <div class="panel-notas-header">
+      <div class="biblioteca-titulo">Notas y subrayados</div>
+      <button class="boton-exportar" id="botonExportarNotas" title="Exportar a Markdown">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8M8 10L5 7M8 10l3-3"/><path d="M3 12v1a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1"/></svg>
+      </button>
+    </div>
+    <div id="listaSubrayados">
+      <p class="biblioteca-vacia">Selecciona texto en la lectura para subrayarlo.</p>
+    </div>
+  </aside>
+</div>
+
+<div class="popover-subrayado" id="popoverSubrayado">
+  <button id="botonSubrayar">Subrayar</button>
+</div>
+
+<div class="controles-lectura">
+  <button id="fuenteMenos" aria-label="Reducir tamaño de letra">A−</button>
+  <button id="fuenteMas" aria-label="Aumentar tamaño de letra">A+</button>
+</div>
+
+<div class="modal-overlay" id="modalCategoria">
+  <div class="modal-tarjeta">
+    <p class="modal-titulo">Mover a categoría</p>
+    <p class="modal-subtitulo" id="modalCategoriaDoc"></p>
+    <input type="text" class="modal-input" id="inputCategoria" placeholder="Nombre de la categoría">
+    <div class="modal-chips" id="chipsCategorias"></div>
+    <div class="modal-acciones">
+      <button class="boton-fantasma" id="cancelarCategoria">Cancelar</button>
+      <button class="boton-primario" id="confirmarCategoria">Mover</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = window.APP_CONFIG.SUPABASE_URL;
+const SUPABASE_ANON_KEY = window.APP_CONFIG.SUPABASE_ANON_KEY;
+const supabaseCliente = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let sesionActual = null;
+
+async function fetchAutenticado(url, opciones = {}) {
+  const encabezados = new Headers(opciones.headers || {});
+  if (sesionActual) encabezados.set('Authorization', `Bearer ${sesionActual.access_token}`);
+  return fetch(url, { ...opciones, headers: encabezados });
+}
+
+const entradaPdf = document.getElementById('entradaPdf');
+const bandeja = document.getElementById('bandeja');
+const articulo = document.getElementById('articulo');
+const tituloArticulo = document.getElementById('tituloArticulo');
+const cuerpoTexto = document.getElementById('cuerpoTexto');
+const metaPalabras = document.getElementById('metaPalabras');
+const metaIdioma = document.getElementById('metaIdioma');
+const botonTraducir = document.getElementById('botonTraducir');
+const barraTraduccion = document.getElementById('barraTraduccion');
+const rellenoProgreso = document.getElementById('rellenoProgreso');
+const porcentajeTraduccion = document.getElementById('porcentajeTraduccion');
+const estadoTraduccion = document.getElementById('estadoTraduccion');
+const toggleIdioma = document.getElementById('toggleIdioma');
+const indicadorIdioma = document.getElementById('indicadorIdioma');
+const indicadorBandeja = document.getElementById('indicadorBandeja');
+const tituloBandeja = document.getElementById('tituloBandeja');
+const mensajeBandeja = document.getElementById('mensajeBandeja');
+const contadorParrafos = document.getElementById('contadorParrafos');
+const selectorPaleta = document.getElementById('selectorPaleta');
+const listaDocumentos = document.getElementById('listaDocumentos');
+const listaSubrayados = document.getElementById('listaSubrayados');
+const popoverSubrayado = document.getElementById('popoverSubrayado');
+const botonSubrayar = document.getElementById('botonSubrayar');
+
+const MENSAJES_EXTRACCION = [
+  'Leyendo páginas…',
+  'Reconstruyendo párrafos cortados por el margen…',
+  'Ordenando el texto…',
+];
+
+const MENSAJES_POR_FASE = {
+  iniciando: 'Preparando el traductor…',
+  descargando_modelo: 'Descargando el modelo de idioma (una sola vez)…',
+  traduciendo: 'Componiendo edición en español…',
+};
+
+let textos = { en: null, es: null };
+let idiomaActual = 'en';
+let nombreArchivoActual = '';
+let hashDocumentoActual = null;
+let traduccionActiva = false;
+let parrafosOriginalActuales = [];
+let ultimoEstadoParrafos = null;
+let posicionEnActual = 0;
+let posicionEsActual = 0;
+let temporizadorGuardarPosicion = null;
+let subrayadosActuales = [];
+let rangoSeleccionActual = null;
+
+function contarPalabras(texto) {
+  return texto.trim().split(/\s+/).filter(Boolean).length;
+}
+
+function dividirEnParrafos(texto) {
+  return texto.split('\n\n');
+}
+
+const MAX_PALABRAS_TITULO = 8;
+const MAX_CARACTERES_TITULO = 70;
+
+function esProbableTitulo(texto) {
+  if (/^\d+$/.test(texto)) return false; // número de página suelto, no es un título
+  const cantidadPalabras = contarPalabras(texto);
+  return cantidadPalabras >= 1 && cantidadPalabras <= MAX_PALABRAS_TITULO && texto.length <= MAX_CARACTERES_TITULO;
+}
+
+function crearParrafoElemento(bloque, pendiente) {
+  const parrafo = document.createElement('p');
+  const textoLimpio = bloque.trim();
+  if (/^-{3,}$/.test(textoLimpio)) {
+    parrafo.className = 'separador-pagina';
+    parrafo.textContent = '· · ·';
+    return parrafo;
+  }
+  parrafo.textContent = textoLimpio;
+  if (esProbableTitulo(textoLimpio)) parrafo.classList.add('titulo-detectado');
+  if (pendiente) parrafo.classList.add('pendiente');
+  return parrafo;
+}
+
+function renderizarCuerpo(texto) {
+  cuerpoTexto.innerHTML = '';
+  dividirEnParrafos(texto).forEach(bloque => cuerpoTexto.appendChild(crearParrafoElemento(bloque, false)));
+}
+
+function iniciarVistaProgresiva(parrafosOriginales) {
+  cuerpoTexto.innerHTML = '';
+  parrafosOriginales.forEach(bloque => cuerpoTexto.appendChild(crearParrafoElemento(bloque, true)));
+}
+
+function actualizarParrafoTraducido(indice, textoTraducido) {
+  const parrafo = cuerpoTexto.children[indice];
+  if (!parrafo || !parrafo.classList.contains('pendiente')) return;
+  if (!parrafo.classList.contains('separador-pagina')) {
+    const textoLimpio = textoTraducido.trim();
+    parrafo.textContent = textoLimpio;
+    parrafo.classList.toggle('titulo-detectado', esProbableTitulo(textoLimpio));
+  }
+  parrafo.classList.remove('pendiente');
+  parrafo.classList.add('recien-traducido');
+  setTimeout(() => parrafo.classList.remove('recien-traducido'), 1100);
+}
+
+function aplicarProgresoConocido() {
+  ultimoEstadoParrafos.forEach((item, indice) => {
+    if (item.traducido !== null && item.traducido !== undefined) {
+      actualizarParrafoTraducido(indice, item.traducido);
+    }
+  });
+}
+
+function actualizarIndicadorIdioma(idioma) {
+  indicadorIdioma.style.transform = idioma === 'es' ? 'translateX(38px)' : 'translateX(0)';
+}
+
+function calcularIndiceParrafoVisible() {
+  const scrollTop = cuerpoTexto.scrollTop;
+  const hijos = cuerpoTexto.children;
+  for (let i = 0; i < hijos.length; i++) {
+    if (hijos[i].offsetTop >= scrollTop - 4) return i;
+  }
+  return 0;
+}
+
+function restaurarPosicion(indice) {
+  const elemento = cuerpoTexto.children[indice];
+  if (elemento) elemento.scrollIntoView({ block: 'start' });
+}
+
+function programarGuardarPosicion() {
+  clearTimeout(temporizadorGuardarPosicion);
+  temporizadorGuardarPosicion = setTimeout(guardarPosicionActual, 800);
+}
+
+function guardarPosicionActual() {
+  if (!hashDocumentoActual || traduccionActiva) return;
+  const indice = calcularIndiceParrafoVisible();
+  if (idiomaActual === 'en') posicionEnActual = indice; else posicionEsActual = indice;
+  fetchAutenticado(`/api/documentos/${hashDocumentoActual}/posicion`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idioma: idiomaActual, indice_parrafo: indice }),
+  }).catch(() => {});
+}
+
+function mostrarIdioma(idioma) {
+  idiomaActual = idioma;
+  toggleIdioma.querySelectorAll('button').forEach(b => b.classList.toggle('activo', b.dataset.idioma === idioma));
+  actualizarIndicadorIdioma(idioma);
+  guardarUltimoAbierto();
+
+  if (idioma === 'en') {
+    renderizarCuerpo(textos.en);
+    metaPalabras.textContent = `${contarPalabras(textos.en).toLocaleString('es')} palabras`;
+    metaIdioma.textContent = 'Edición original · inglés';
+    restaurarPosicion(posicionEnActual);
+    cargarSubrayados();
+    return;
+  }
+
+  if (textos.es) {
+    renderizarCuerpo(textos.es);
+    metaPalabras.textContent = `${contarPalabras(textos.es).toLocaleString('es')} palabras`;
+    metaIdioma.textContent = 'Edición traducida · español';
+    restaurarPosicion(posicionEsActual);
+    cargarSubrayados();
+  } else if (traduccionActiva) {
+    iniciarVistaProgresiva(parrafosOriginalActuales);
+    metaPalabras.textContent = '';
+    metaIdioma.textContent = 'Edición traducida · español — componiendo…';
+    if (ultimoEstadoParrafos) aplicarProgresoConocido();
+  }
+}
+
+/* ---------- Subrayados y notas ---------- */
+
+function obtenerOffsetEnParrafo(parrafoElemento, nodo, offsetEnNodo) {
+  let offset = 0;
+  const recorredor = document.createTreeWalker(parrafoElemento, NodeFilter.SHOW_TEXT);
+  let actual;
+  while ((actual = recorredor.nextNode())) {
+    if (actual === nodo) return offset + offsetEnNodo;
+    offset += actual.textContent.length;
+  }
+  return offset;
+}
+
+function obtenerSegmentosEnRango(rango) {
+  const parrafos = [...cuerpoTexto.children].filter(el => el.tagName === 'P' && rango.intersectsNode(el));
+  return parrafos
+    .map(parrafoElemento => {
+      const indice = [...cuerpoTexto.children].indexOf(parrafoElemento);
+      const textoPlano = parrafoElemento.textContent;
+      const offsetInicio = parrafoElemento.contains(rango.startContainer)
+        ? obtenerOffsetEnParrafo(parrafoElemento, rango.startContainer, rango.startOffset)
+        : 0;
+      const offsetFin = parrafoElemento.contains(rango.endContainer)
+        ? obtenerOffsetEnParrafo(parrafoElemento, rango.endContainer, rango.endOffset)
+        : textoPlano.length;
+      return {
+        parrafo_indice: indice,
+        offset_inicio: offsetInicio,
+        offset_fin: offsetFin,
+        texto: textoPlano.slice(offsetInicio, offsetFin),
+      };
+    })
+    .filter(segmento => segmento.offset_fin > segmento.offset_inicio && segmento.texto.trim());
+}
+
+function mostrarPopoverSubrayado(rango) {
+  const rect = rango.getBoundingClientRect();
+  popoverSubrayado.style.left = `${rect.left + rect.width / 2}px`;
+  popoverSubrayado.style.top = `${rect.top - 10}px`;
+  popoverSubrayado.classList.add('visible');
+}
+
+function ocultarPopoverSubrayado() {
+  popoverSubrayado.classList.remove('visible');
+  rangoSeleccionActual = null;
+}
+
+function manejarSeleccionTexto() {
+  const seleccion = window.getSelection();
+  if (!seleccion || seleccion.isCollapsed || seleccion.rangeCount === 0) {
+    ocultarPopoverSubrayado();
+    return;
+  }
+  const rango = seleccion.getRangeAt(0);
+  if (!cuerpoTexto.contains(rango.commonAncestorContainer)) {
+    ocultarPopoverSubrayado();
+    return;
+  }
+  rangoSeleccionActual = rango.cloneRange();
+  mostrarPopoverSubrayado(rango);
+}
+
+async function confirmarSubrayado() {
+  if (!rangoSeleccionActual || !hashDocumentoActual) return;
+  const segmentos = obtenerSegmentosEnRango(rangoSeleccionActual);
+  ocultarPopoverSubrayado();
+  window.getSelection().removeAllRanges();
+  if (segmentos.length === 0) return;
+
+  const respuesta = await fetchAutenticado(`/api/documentos/${hashDocumentoActual}/subrayados`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idioma: idiomaActual, segmentos }),
+  });
+  const creados = await respuesta.json();
+  subrayadosActuales.push(...creados);
+  aplicarTodosLosSubrayados();
+  renderizarPanelNotas();
+}
+
+function reconstruirParrafoConSubrayados(parrafoElemento, textoPlano, subrayados) {
+  parrafoElemento.innerHTML = '';
+  const ordenados = [...subrayados].sort((a, b) => a.offset_inicio - b.offset_inicio);
+  let cursor = 0;
+  ordenados.forEach(s => {
+    if (s.offset_inicio > cursor) {
+      parrafoElemento.appendChild(document.createTextNode(textoPlano.slice(cursor, s.offset_inicio)));
+    }
+    const marca = document.createElement('mark');
+    marca.className = 'subrayado-texto';
+    marca.dataset.idSubrayado = s.id;
+    marca.textContent = textoPlano.slice(s.offset_inicio, s.offset_fin);
+    parrafoElemento.appendChild(marca);
+    cursor = s.offset_fin;
+  });
+  if (cursor < textoPlano.length) {
+    parrafoElemento.appendChild(document.createTextNode(textoPlano.slice(cursor)));
+  }
+}
+
+function aplicarTodosLosSubrayados() {
+  const porParrafo = new Map();
+  subrayadosActuales.forEach(s => {
+    if (!porParrafo.has(s.parrafo_indice)) porParrafo.set(s.parrafo_indice, []);
+    porParrafo.get(s.parrafo_indice).push(s);
+  });
+  [...cuerpoTexto.children].forEach((parrafoElemento, indice) => {
+    if (parrafoElemento.classList.contains('separador-pagina')) return;
+    reconstruirParrafoConSubrayados(parrafoElemento, parrafoElemento.textContent, porParrafo.get(indice) || []);
+  });
+}
+
+async function cargarSubrayados() {
+  if (!hashDocumentoActual) return;
+  const respuesta = await fetchAutenticado(`/api/documentos/${hashDocumentoActual}/subrayados?idioma=${idiomaActual}`);
+  subrayadosActuales = await respuesta.json();
+  aplicarTodosLosSubrayados();
+  renderizarPanelNotas();
+}
+
+function crearFilaSubrayado(s) {
+  const fila = document.createElement('div');
+  fila.className = 'nota-item';
+  fila.dataset.idSubrayado = s.id;
+
+  const cita = document.createElement('p');
+  cita.className = 'nota-cita';
+  cita.textContent = `"${s.texto}"`;
+  fila.appendChild(cita);
+
+  const comentarioTexto = document.createElement('p');
+  comentarioTexto.className = 'nota-comentario';
+  const areaComentario = document.createElement('textarea');
+  areaComentario.className = 'nota-comentario-input';
+  areaComentario.placeholder = 'Agregar un comentario…';
+  areaComentario.value = s.comentario || '';
+  areaComentario.style.display = 'none';
+
+  function mostrarEstadoComentario() {
+    if (s.comentario) {
+      comentarioTexto.textContent = s.comentario;
+      comentarioTexto.style.display = 'block';
+      areaComentario.style.display = 'none';
+    } else {
+      comentarioTexto.textContent = '';
+      comentarioTexto.style.display = 'block';
+      areaComentario.style.display = 'none';
+    }
+  }
+  mostrarEstadoComentario();
+
+  comentarioTexto.addEventListener('click', () => {
+    comentarioTexto.style.display = 'none';
+    areaComentario.style.display = 'block';
+    areaComentario.focus();
+  });
+
+  areaComentario.addEventListener('blur', async () => {
+    const nuevoValor = areaComentario.value.trim();
+    if (nuevoValor !== (s.comentario || '')) {
+      s.comentario = nuevoValor || null;
+      await fetchAutenticado(`/api/subrayados/${s.id}/comentario`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ comentario: nuevoValor }),
+      });
+    }
+    mostrarEstadoComentario();
+  });
+
+  fila.appendChild(comentarioTexto);
+  fila.appendChild(areaComentario);
+
+  const pie = document.createElement('div');
+  pie.className = 'nota-pie';
+
+  const irBoton = document.createElement('button');
+  irBoton.className = 'nota-ir';
+  irBoton.textContent = 'Ir al texto';
+  irBoton.addEventListener('click', () => {
+    const marca = cuerpoTexto.querySelector(`mark[data-id-subrayado="${s.id}"]`);
+    if (marca) marca.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
+  pie.appendChild(irBoton);
+
+  const borrarBoton = document.createElement('button');
+  borrarBoton.className = 'nota-borrar';
+  borrarBoton.textContent = 'Eliminar';
+  borrarBoton.addEventListener('click', async () => {
+    await fetchAutenticado(`/api/subrayados/${s.id}`, { method: 'DELETE' });
+    subrayadosActuales = subrayadosActuales.filter(x => x.id !== s.id);
+    aplicarTodosLosSubrayados();
+    renderizarPanelNotas();
+  });
+  pie.appendChild(borrarBoton);
+
+  fila.appendChild(pie);
+  return fila;
+}
+
+function renderizarPanelNotas() {
+  if (subrayadosActuales.length === 0) {
+    listaSubrayados.innerHTML = '<p class="biblioteca-vacia">Selecciona texto en la lectura para subrayarlo.</p>';
+    return;
+  }
+  listaSubrayados.innerHTML = '';
+  const ordenados = [...subrayadosActuales].sort(
+    (a, b) => a.parrafo_indice - b.parrafo_indice || a.offset_inicio - b.offset_inicio
+  );
+  ordenados.forEach(s => listaSubrayados.appendChild(crearFilaSubrayado(s)));
+}
+
+async function exportarNotas() {
+  if (!hashDocumentoActual) return;
+
+  const respuesta = await fetchAutenticado(`/api/documentos/${hashDocumentoActual}/exportar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  if (!respuesta.ok) {
+    const datos = await respuesta.json().catch(() => ({}));
+    alert(datos.error || 'No se pudo exportar las notas');
+    return;
+  }
+
+  const nombreArchivo = respuesta.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1] || 'notas.md';
+  const blob = await respuesta.blob();
+  const enlace = document.createElement('a');
+  enlace.href = URL.createObjectURL(blob);
+  enlace.download = nombreArchivo;
+  enlace.click();
+  URL.revokeObjectURL(enlace.href);
+}
+
+async function cargarPdf(archivo) {
+  indicadorBandeja.textContent = 'Procesando';
+  indicadorBandeja.classList.add('activo');
+  mensajeBandeja.innerHTML = `${archivo.name}<span class="telex"><span></span><span></span><span></span></span>`;
+
+  let indiceMensaje = 0;
+  tituloBandeja.textContent = MENSAJES_EXTRACCION[0];
+  const rotarMensajes = setInterval(() => {
+    indiceMensaje = (indiceMensaje + 1) % MENSAJES_EXTRACCION.length;
+    tituloBandeja.textContent = MENSAJES_EXTRACCION[indiceMensaje];
+  }, 1400);
+
+  const formData = new FormData();
+  formData.append('pdf', archivo);
+  const respuesta = await fetchAutenticado('/api/extraer', { method: 'POST', body: formData });
+  const datos = await respuesta.json();
+  clearInterval(rotarMensajes);
+  indicadorBandeja.classList.remove('activo');
+  indicadorBandeja.textContent = 'Instrumento listo';
+
+  if (!respuesta.ok) {
+    alert('Error al extraer el PDF: ' + (datos.error || respuesta.status));
+    tituloBandeja.textContent = 'Ninguna edición cargada';
+    mensajeBandeja.innerHTML = 'Arrastra un PDF aquí, o usa "Cargar PDF" arriba.<br>Se extrae el texto y puedes traducirlo del inglés al español.';
+    return;
+  }
+
+  await aplicarDocumentoEnUI({
+    hash: datos.hash,
+    nombre: datos.nombre.replace(/\.pdf$/i, ''),
+    textoEn: datos.texto,
+    textoEs: datos.texto_es || null,
+    posicionEn: datos.posicion_en || 0,
+    posicionEs: datos.posicion_es || 0,
+  });
+
+  cargarListaDocumentos();
+}
+
+async function aplicarDocumentoEnUI(doc) {
+  nombreArchivoActual = doc.nombre;
+  hashDocumentoActual = doc.hash;
+  textos = { en: doc.textoEn, es: doc.textoEs };
+  posicionEnActual = doc.posicionEn;
+  posicionEsActual = doc.posicionEs;
+  traduccionActiva = false;
+  ultimoEstadoParrafos = null;
+
+  bandeja.style.display = 'none';
+  articulo.classList.add('visible');
+  tituloArticulo.textContent = nombreArchivoActual;
+  toggleIdioma.style.display = 'flex';
+  barraTraduccion.style.display = 'none';
+  resaltarDocumentoActivo();
+
+  if (textos.es) {
+    toggleIdioma.querySelector('[data-idioma="es"]').disabled = false;
+    botonTraducir.style.display = 'none';
+    mostrarIdioma('en');
+    return;
+  }
+
+  toggleIdioma.querySelector('[data-idioma="es"]').disabled = true;
+  botonTraducir.style.display = 'inline-flex';
+  botonTraducir.disabled = true;
+  botonTraducir.textContent = 'Traducir al español';
+
+  const hayActiva = await reanudarTraduccionSiHayActiva(doc.hash);
+  if (!hayActiva) {
+    botonTraducir.disabled = false;
+    mostrarIdioma('en');
+  }
+}
+
+async function abrirDocumentoDesdeBiblioteca(hash, mostrarError = true) {
+  const respuesta = await fetchAutenticado(`/api/documentos/${hash}`);
+  const datos = await respuesta.json();
+  if (!respuesta.ok) {
+    if (mostrarError) alert('No se pudo abrir el documento: ' + (datos.error || respuesta.status));
+    return false;
+  }
+  await aplicarDocumentoEnUI({
+    hash: datos.hash,
+    nombre: datos.nombre_archivo.replace(/\.pdf$/i, ''),
+    textoEn: datos.texto_en,
+    textoEs: datos.texto_es,
+    posicionEn: datos.posicion_en || 0,
+    posicionEs: datos.posicion_es || 0,
+  });
+  return true;
+}
+
+function guardarUltimoAbierto() {
+  if (!hashDocumentoActual) return;
+  localStorage.setItem('sala-lectura-ultimo', JSON.stringify({ hash: hashDocumentoActual, idioma: idiomaActual }));
+}
+
+function resaltarDocumentoActivo() {
+  listaDocumentos.querySelectorAll('.documento-item').forEach(fila => {
+    fila.classList.toggle('activo', fila.dataset.hash === hashDocumentoActual);
+  });
+}
+
+function obtenerCategoriasColapsadas() {
+  try {
+    return JSON.parse(localStorage.getItem('sala-lectura-categorias-colapsadas') || '{}');
+  } catch {
+    return {};
+  }
+}
+
+function alternarCategoriaColapsada(nombreCategoria) {
+  const colapsadas = obtenerCategoriasColapsadas();
+  colapsadas[nombreCategoria] = !colapsadas[nombreCategoria];
+  localStorage.setItem('sala-lectura-categorias-colapsadas', JSON.stringify(colapsadas));
+  return colapsadas[nombreCategoria];
+}
+
+function crearIconoAccion(pathD, titulo, onClick) {
+  const boton = document.createElement('button');
+  boton.className = 'accion-doc';
+  boton.title = titulo;
+  boton.innerHTML = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">${pathD}</svg>`;
+  boton.addEventListener('click', e => { e.stopPropagation(); onClick(); });
+  return boton;
+}
+
+async function renombrarDocumento(doc, filaElemento, nombreSpan) {
+  const input = document.createElement('input');
+  input.className = 'documento-nombre-input';
+  input.value = doc.nombre_archivo.replace(/\.pdf$/i, '');
+  nombreSpan.replaceWith(input);
+  input.focus();
+  input.select();
+
+  const confirmar = async () => {
+    const nuevoNombre = input.value.trim();
+    if (nuevoNombre && nuevoNombre !== doc.nombre_archivo) {
+      await fetchAutenticado(`/api/documentos/${doc.hash}/nombre`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: nuevoNombre }),
+      });
+      if (doc.hash === hashDocumentoActual) {
+        nombreArchivoActual = nuevoNombre;
+        tituloArticulo.textContent = nuevoNombre;
+      }
+    }
+    cargarListaDocumentos();
+  };
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') input.blur();
+    if (e.key === 'Escape') { input.value = doc.nombre_archivo; input.blur(); }
+  });
+  input.addEventListener('blur', confirmar, { once: true });
+}
+
+const modalCategoria = document.getElementById('modalCategoria');
+const modalCategoriaDoc = document.getElementById('modalCategoriaDoc');
+const inputCategoria = document.getElementById('inputCategoria');
+const chipsCategorias = document.getElementById('chipsCategorias');
+let docEnEdicionCategoria = null;
+
+async function cambiarCategoriaDocumento(doc) {
+  docEnEdicionCategoria = doc;
+  modalCategoriaDoc.textContent = doc.nombre_archivo.replace(/\.pdf$/i, '');
+  inputCategoria.value = doc.categoria === 'Sin categoría' ? '' : doc.categoria;
+  modalCategoria.classList.add('visible');
+  inputCategoria.focus();
+  inputCategoria.select();
+
+  const respuesta = await fetchAutenticado('/api/documentos');
+  const documentos = await respuesta.json();
+  const categoriasUnicas = [...new Set(documentos.map(d => d.categoria).filter(c => c !== 'Sin categoría'))].sort();
+
+  chipsCategorias.innerHTML = '';
+  categoriasUnicas.forEach(nombre => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'chip-categoria';
+    chip.textContent = nombre;
+    chip.addEventListener('click', () => { inputCategoria.value = nombre; inputCategoria.focus(); });
+    chipsCategorias.appendChild(chip);
+  });
+}
+
+function cerrarModalCategoria() {
+  modalCategoria.classList.remove('visible');
+  docEnEdicionCategoria = null;
+}
+
+async function confirmarModalCategoria() {
+  if (!docEnEdicionCategoria) return;
+  await fetchAutenticado(`/api/documentos/${docEnEdicionCategoria.hash}/categoria`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ categoria: inputCategoria.value.trim() }),
+  });
+  cerrarModalCategoria();
+  cargarListaDocumentos();
+}
+
+document.getElementById('cancelarCategoria').addEventListener('click', cerrarModalCategoria);
+document.getElementById('confirmarCategoria').addEventListener('click', confirmarModalCategoria);
+modalCategoria.addEventListener('click', e => { if (e.target === modalCategoria) cerrarModalCategoria(); });
+inputCategoria.addEventListener('keydown', e => {
+  if (e.key === 'Enter') confirmarModalCategoria();
+  if (e.key === 'Escape') cerrarModalCategoria();
+});
+
+async function eliminarDocumento(doc) {
+  if (!confirm(`¿Eliminar "${doc.nombre_archivo}" de la biblioteca? Esto borra el texto extraído y la traducción guardada.`)) return;
+  await fetchAutenticado(`/api/documentos/${doc.hash}`, { method: 'DELETE' });
+  if (doc.hash === hashDocumentoActual) {
+    hashDocumentoActual = null;
+    textos = { en: null, es: null };
+    articulo.classList.remove('visible');
+    bandeja.style.display = 'block';
+  }
+  const ultimo = JSON.parse(localStorage.getItem('sala-lectura-ultimo') || 'null');
+  if (ultimo && ultimo.hash === doc.hash) localStorage.removeItem('sala-lectura-ultimo');
+  cargarListaDocumentos();
+}
+
+function crearFilaDocumento(doc) {
+  const fila = document.createElement('div');
+  fila.className = 'documento-item';
+  fila.dataset.hash = doc.hash;
+  if (doc.hash === hashDocumentoActual) fila.classList.add('activo');
+
+  const abrir = document.createElement('button');
+  abrir.className = 'documento-abrir';
+
+  const nombre = document.createElement('span');
+  nombre.className = 'nombre-doc';
+  nombre.textContent = doc.nombre_archivo.replace(/\.pdf$/i, '');
+  abrir.appendChild(nombre);
+
+  if (doc.tiene_traduccion) {
+    const punto = document.createElement('span');
+    punto.className = 'punto-traducido';
+    punto.title = 'Ya traducido';
+    abrir.appendChild(punto);
+  }
+
+  abrir.addEventListener('click', () => abrirDocumentoDesdeBiblioteca(doc.hash));
+  fila.appendChild(abrir);
+
+  const acciones = document.createElement('div');
+  acciones.className = 'documento-acciones';
+  acciones.appendChild(crearIconoAccion(
+    '<path d="M11 2l3 3L5 14H2v-3z"/>', 'Renombrar',
+    () => renombrarDocumento(doc, fila, nombre)
+  ));
+  acciones.appendChild(crearIconoAccion(
+    '<path d="M2 4h4l1.5 2H14v7a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/>', 'Cambiar categoría',
+    () => cambiarCategoriaDocumento(doc)
+  ));
+  acciones.appendChild(crearIconoAccion(
+    '<path d="M3 4h10M6 4V2.5h4V4M6.5 7v4M9.5 7v4M4 4l.7 9a1 1 0 0 0 1 .9h4.6a1 1 0 0 0 1-.9L12 4"/>', 'Eliminar',
+    () => eliminarDocumento(doc)
+  ));
+  fila.appendChild(acciones);
+
+  return fila;
+}
+
+async function cargarListaDocumentos() {
+  const respuesta = await fetchAutenticado('/api/documentos');
+  const documentos = await respuesta.json();
+
+  if (documentos.length === 0) {
+    listaDocumentos.innerHTML = '<p class="biblioteca-vacia">Todavía no hay lecturas cargadas.</p>';
+    return;
+  }
+
+  const grupos = new Map();
+  documentos.forEach(doc => {
+    const clave = doc.categoria || 'Sin categoría';
+    if (!grupos.has(clave)) grupos.set(clave, []);
+    grupos.get(clave).push(doc);
+  });
+
+  const nombresCategorias = [...grupos.keys()].sort((a, b) => {
+    if (a === 'Sin categoría') return 1;
+    if (b === 'Sin categoría') return -1;
+    return a.localeCompare(b);
+  });
+
+  const colapsadas = obtenerCategoriasColapsadas();
+  listaDocumentos.innerHTML = '';
+
+  nombresCategorias.forEach(nombreCategoria => {
+    const grupo = document.createElement('div');
+    grupo.className = 'categoria-grupo';
+    if (colapsadas[nombreCategoria]) grupo.classList.add('colapsada');
+
+    const header = document.createElement('button');
+    header.className = 'categoria-header';
+    header.innerHTML = `
+      <span class="categoria-chevron"><svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l4 4-4 4"/></svg></span>
+      <span class="categoria-nombre">${nombreCategoria}</span>
+      <span class="categoria-cuenta">${grupos.get(nombreCategoria).length}</span>
+    `;
+    header.addEventListener('click', () => {
+      const colapsada = alternarCategoriaColapsada(nombreCategoria);
+      grupo.classList.toggle('colapsada', colapsada);
+    });
+    grupo.appendChild(header);
+
+    const contenedorDocs = document.createElement('div');
+    contenedorDocs.className = 'categoria-documentos';
+    grupos.get(nombreCategoria).forEach(doc => contenedorDocs.appendChild(crearFilaDocumento(doc)));
+    grupo.appendChild(contenedorDocs);
+
+    listaDocumentos.appendChild(grupo);
+  });
+}
+
+function iniciarPollingTraduccion(idTrabajo) {
+  const intervalo = setInterval(async () => {
+    const respuestaEstado = await fetchAutenticado(`/api/traducir/${idTrabajo}`);
+    const trabajo = await respuestaEstado.json();
+    const porcentaje = Math.round((trabajo.progreso || 0) * 100);
+    rellenoProgreso.style.width = `${porcentaje}%`;
+    porcentajeTraduccion.textContent = `${porcentaje}%`;
+    estadoTraduccion.textContent = MENSAJES_POR_FASE[trabajo.fase] || 'Traduciendo…';
+    contadorParrafos.textContent = trabajo.total_parrafos
+      ? `párrafo ${trabajo.parrafo_actual} de ${trabajo.total_parrafos}`
+      : '';
+
+    if (trabajo.parrafos) {
+      ultimoEstadoParrafos = trabajo.parrafos;
+      if (idiomaActual === 'es') aplicarProgresoConocido();
+    }
+
+    if (trabajo.estado === 'listo') {
+      clearInterval(intervalo);
+      traduccionActiva = false;
+      textos.es = trabajo.resultado;
+      barraTraduccion.style.display = 'none';
+      mostrarIdioma('es');
+      cargarListaDocumentos();
+    } else if (trabajo.estado === 'error') {
+      clearInterval(intervalo);
+      traduccionActiva = false;
+      estadoTraduccion.textContent = 'Error: ' + trabajo.mensaje;
+    }
+  }, 1200);
+}
+
+async function reanudarTraduccionSiHayActiva(hash) {
+  const respuesta = await fetchAutenticado(`/api/documentos/${hash}/trabajo-activo`);
+  const datos = await respuesta.json();
+  if (!datos.id_trabajo) return false;
+
+  traduccionActiva = true;
+  ultimoEstadoParrafos = null;
+  parrafosOriginalActuales = dividirEnParrafos(textos.en);
+  toggleIdioma.querySelector('[data-idioma="es"]').disabled = false;
+  botonTraducir.style.display = 'none';
+
+  barraTraduccion.style.display = 'flex';
+  estadoTraduccion.textContent = 'Retomando traducción en curso…';
+  contadorParrafos.textContent = '';
+
+  mostrarIdioma('es');
+  iniciarPollingTraduccion(datos.id_trabajo);
+  return true;
+}
+
+async function traducir() {
+  botonTraducir.disabled = true;
+  botonTraducir.style.display = 'none';
+  traduccionActiva = true;
+  ultimoEstadoParrafos = null;
+  parrafosOriginalActuales = dividirEnParrafos(textos.en);
+  toggleIdioma.querySelector('[data-idioma="es"]').disabled = false;
+
+  barraTraduccion.style.display = 'flex';
+  rellenoProgreso.style.width = '0%';
+  porcentajeTraduccion.textContent = '0%';
+  estadoTraduccion.textContent = MENSAJES_POR_FASE.iniciando;
+  contadorParrafos.textContent = '';
+
+  mostrarIdioma('es');
+
+  const respuestaInicio = await fetchAutenticado('/api/traducir', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ texto: textos.en, origen: 'en', destino: 'es', hash: hashDocumentoActual }),
+  });
+  const { id_trabajo, error } = await respuestaInicio.json();
+  if (error) {
+    alert('Error al iniciar la traducción: ' + error);
+    traduccionActiva = false;
+    botonTraducir.disabled = false;
+    botonTraducir.style.display = 'inline-flex';
+    barraTraduccion.style.display = 'none';
+    mostrarIdioma('en');
+    return;
+  }
+
+  iniciarPollingTraduccion(id_trabajo);
+}
+
+entradaPdf.addEventListener('change', e => {
+  if (e.target.files[0]) cargarPdf(e.target.files[0]);
+});
+
+['dragenter', 'dragover'].forEach(evt =>
+  bandeja.addEventListener(evt, e => { e.preventDefault(); bandeja.classList.add('arrastrando'); })
+);
+['dragleave', 'drop'].forEach(evt =>
+  bandeja.addEventListener(evt, e => { e.preventDefault(); bandeja.classList.remove('arrastrando'); })
+);
+bandeja.addEventListener('drop', e => {
+  const archivo = e.dataTransfer.files[0];
+  if (archivo && archivo.type === 'application/pdf') cargarPdf(archivo);
+});
+
+botonTraducir.addEventListener('click', traducir);
+
+toggleIdioma.addEventListener('click', e => {
+  const boton = e.target.closest('button');
+  if (!boton || boton.disabled) return;
+  const idioma = boton.dataset.idioma;
+  if (idioma === 'es' && !textos.es && !traduccionActiva) return;
+  mostrarIdioma(idioma);
+});
+
+function aplicarPaleta(paleta) {
+  if (paleta === 'blanco') {
+    delete document.documentElement.dataset.modo;
+  } else {
+    document.documentElement.dataset.modo = paleta;
+  }
+  document.querySelectorAll('.muestra-paleta').forEach(b => b.classList.toggle('activo', b.dataset.paleta === paleta));
+  localStorage.setItem('sala-lectura-paleta', paleta);
+}
+
+selectorPaleta.addEventListener('click', e => {
+  const boton = e.target.closest('.muestra-paleta');
+  if (boton) aplicarPaleta(boton.dataset.paleta);
+});
+
+document.getElementById('fuenteMas').addEventListener('click', () => ajustarFuente(0.05));
+document.getElementById('fuenteMenos').addEventListener('click', () => ajustarFuente(-0.05));
+
+function ajustarFuente(delta) {
+  const raiz = document.documentElement;
+  const actual = parseFloat(getComputedStyle(raiz).getPropertyValue('--escala-texto'));
+  const nuevo = Math.min(1.4, Math.max(0.85, actual + delta));
+  raiz.style.setProperty('--escala-texto', `${nuevo}rem`);
+  localStorage.setItem('sala-lectura-escala', nuevo);
+}
+
+cuerpoTexto.addEventListener('scroll', () => { programarGuardarPosicion(); ocultarPopoverSubrayado(); });
+
+document.addEventListener('mouseup', e => {
+  if (cuerpoTexto.contains(e.target)) {
+    setTimeout(manejarSeleccionTexto, 0);
+  } else if (!popoverSubrayado.contains(e.target)) {
+    ocultarPopoverSubrayado();
+  }
+});
+
+botonSubrayar.addEventListener('click', confirmarSubrayado);
+document.getElementById('botonExportarNotas').addEventListener('click', () => exportarNotas());
+
+cuerpoTexto.addEventListener('click', e => {
+  const marca = e.target.closest('.subrayado-texto');
+  if (!marca) return;
+  const fila = listaSubrayados.querySelector(`[data-id-subrayado="${marca.dataset.idSubrayado}"]`);
+  if (fila) {
+    fila.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    fila.classList.add('destacada');
+    setTimeout(() => fila.classList.remove('destacada'), 1200);
+  }
+});
+
+(function restaurarPreferencias() {
+  const paletaGuardada = localStorage.getItem('sala-lectura-paleta') || 'blanco';
+  aplicarPaleta(paletaGuardada);
+
+  const escalaGuardada = localStorage.getItem('sala-lectura-escala');
+  if (escalaGuardada) {
+    document.documentElement.style.setProperty('--escala-texto', `${escalaGuardada}rem`);
+  }
+})();
+
+async function iniciarSesionEnApp() {
+  await cargarListaDocumentos();
+
+  const ultimo = JSON.parse(localStorage.getItem('sala-lectura-ultimo') || 'null');
+  if (!ultimo) return;
+  const abierto = await abrirDocumentoDesdeBiblioteca(ultimo.hash, false);
+  if (!abierto) {
+    localStorage.removeItem('sala-lectura-ultimo');
+    return;
+  }
+  if (ultimo.idioma === 'es' && textos.es) mostrarIdioma('es');
+}
+
+const pantallaLogin = document.getElementById('pantallaLogin');
+const inputCorreoLogin = document.getElementById('inputCorreoLogin');
+const botonEnviarLink = document.getElementById('botonEnviarLink');
+const mensajeLogin = document.getElementById('mensajeLogin');
+
+async function enviarLinkMagico() {
+  const correo = inputCorreoLogin.value.trim();
+  if (!correo) return;
+  botonEnviarLink.disabled = true;
+  mensajeLogin.textContent = 'Enviando…';
+  mensajeLogin.classList.remove('exito');
+
+  const { error } = await supabaseCliente.auth.signInWithOtp({
+    email: correo,
+    options: { emailRedirectTo: window.location.origin },
+  });
+
+  botonEnviarLink.disabled = false;
+  if (error) {
+    mensajeLogin.textContent = error.message;
+  } else {
+    mensajeLogin.textContent = `Te mandamos un link a ${correo}. Ábrelo para entrar.`;
+    mensajeLogin.classList.add('exito');
+  }
+}
+
+botonEnviarLink.addEventListener('click', enviarLinkMagico);
+inputCorreoLogin.addEventListener('keydown', e => { if (e.key === 'Enter') enviarLinkMagico(); });
+
+supabaseCliente.auth.onAuthStateChange((_evento, sesion) => {
+  sesionActual = sesion;
+  if (sesion) {
+    pantallaLogin.style.display = 'none';
+    iniciarSesionEnApp();
+  } else {
+    pantallaLogin.style.display = 'flex';
+  }
+});
+</script>
+
+</body>
+</html>
