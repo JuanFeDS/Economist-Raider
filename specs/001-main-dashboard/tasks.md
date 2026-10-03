@@ -18,10 +18,10 @@ implementable and testable. No test tasks (not requested in spec).
 
 **Purpose**: Estructura del proyecto e inicialización
 
-- [ ] T001 Create full project directory structure per plan.md (domain/, application/, adapters/, infrastructure/, tests/)
-- [ ] T002 Create requirements.txt with all dependencies (nicegui, httpx, beautifulsoup4, lxml, playwright, pandas, pydantic, apscheduler, pytest, pytest-httpx, ruff)
-- [ ] T003 [P] Create pyproject.toml with ruff linting and formatting configuration
-- [ ] T004 [P] Create .env.example with PORT, SCHEDULE_* and LOG_LEVEL variables
+- [x] T001 Create full project directory structure per plan.md (domain/, application/, adapters/, infrastructure/, tests/)
+- [x] T002 Create requirements.txt with all dependencies (nicegui, httpx, beautifulsoup4, lxml, playwright, pandas, pydantic, apscheduler, pytest, pytest-httpx, ruff)
+- [x] T003 [P] Create pyproject.toml with ruff linting and formatting configuration
+- [x] T004 [P] Create .env.example with PORT, SCHEDULE_* and LOG_LEVEL variables
 
 ---
 
@@ -31,18 +31,18 @@ implementable and testable. No test tasks (not requested in spec).
 
 **⚠️ CRÍTICO**: Ninguna historia de usuario puede comenzar hasta que esta fase esté completa
 
-- [ ] T005 Create database migration in infrastructure/db/migrations/001_initial.sql (sources, indicators, measurements, collection_runs tables + indexes)
-- [ ] T006 Implement SQLite connection manager in infrastructure/db/connection.py (singleton, migration runner on first connect)
-- [ ] T007 [P] Implement Indicator entity with pydantic v2 in domain/entities/indicator.py (IndicatorCategory, PeriodType enums, quarantine fields, invariants)
-- [ ] T008 [P] Implement Source entity with pydantic v2 in domain/entities/source.py (SourceType, RunStatus enums, is_active flag)
-- [ ] T009 [P] Implement Measurement entity in domain/entities/historical_series.py (value as Decimal, measured_at as date)
-- [ ] T010 [P] Implement CollectionRun entity in domain/entities/collection_run.py (started_at, finished_at, records_collected, records_quarantined)
-- [ ] T011 [P] Define IndicatorRepository abstract port in domain/ports/indicator_repository.py (get_latest, get_all_latest, save, get_history, exists)
-- [ ] T012 [P] Define SourceRepository abstract port in domain/ports/source_repository.py (get_all_active, get_by_id, update_run_status, save_collection_run)
-- [ ] T013 Implement SQLiteIndicatorRepository in adapters/repositories/sqlite_indicator_repository.py (implements IndicatorRepository port, uses connection.py)
-- [ ] T014 [P] Implement SQLiteSourceRepository in adapters/repositories/sqlite_source_repository.py (implements SourceRepository port)
-- [ ] T015 Implement BaseScraper in adapters/scrapers/base_scraper.py (robots.txt check, rate-limit ≥1s, honest User-Agent, quarantine on invalid data, ScraperError hierarchy)
-- [ ] T016 Create main.py entry point with CLI argument parsing (--init-db, --collect, --collect --source=name, --no-scheduler)
+- [x] T005 Create database migration in infrastructure/db/migrations/001_initial.sql (sources, indicators, measurements, collection_runs tables + indexes)
+- [x] T006 Implement SQLite connection manager in infrastructure/db/connection.py (singleton, migration runner on first connect)
+- [x] T007 [P] Implement Indicator entity with pydantic v2 in domain/entities/indicator.py (IndicatorCategory, PeriodType enums, quarantine fields, invariants)
+- [x] T008 [P] Implement Source entity with pydantic v2 in domain/entities/source.py (SourceType, RunStatus enums, is_active flag)
+- [x] T009 [P] Implement Measurement entity in domain/entities/historical_series.py (value as Decimal, measured_at as date)
+- [x] T010 [P] Implement CollectionRun entity in domain/entities/collection_run.py (started_at, finished_at, records_collected, records_quarantined)
+- [x] T011 [P] Define IndicatorRepository abstract port in domain/ports/indicator_repository.py (get_latest, get_all_latest, save, get_history, exists)
+- [x] T012 [P] Define SourceRepository abstract port in domain/ports/source_repository.py (get_all_active, get_by_id, update_run_status, save_collection_run)
+- [x] T013 Implement SQLiteIndicatorRepository in adapters/repositories/sqlite_indicator_repository.py (implements IndicatorRepository port, uses connection.py)
+- [x] T014 [P] Implement SQLiteSourceRepository in adapters/repositories/sqlite_source_repository.py (implements SourceRepository port)
+- [x] T015 Implement BaseScraper in adapters/scrapers/base_scraper.py (robots.txt check, rate-limit ≥1s, honest User-Agent, quarantine on invalid data, ScraperError hierarchy)
+- [x] T016 Create main.py entry point with CLI argument parsing (--init-db, --collect, --collect --source=name, --no-scheduler)
 
 **Checkpoint**: Dominio completo, persistencia funcional, contrato de scrapers definido ✓
 
@@ -58,14 +58,14 @@ variación y fecha de medición.
 `python main.py` y verificar que aparecen 5 tarjetas con valores numéricos,
 variación y fecha visible en `http://localhost:8080`
 
-- [ ] T017 [US1] Implement GetCurrentIndicators use case in application/use_cases/get_current_indicators.py (calls indicator_repository.get_all_latest(), filters quarantined)
-- [ ] T018 [P] [US1] Implement BanrepScraper in adapters/scrapers/banrep_scraper.py (TRM diaria + Tasa de Referencia, robots.txt check, rate_limit_seconds=2.0)
-- [ ] T019 [P] [US1] Implement DaneScraper in adapters/scrapers/dane_scraper.py (IPC mensual + Tasa de Desempleo mensual + PIB trimestral)
-- [ ] T020 [US1] Implement UpdateSourceData use case in application/use_cases/update_source_data.py (orchestrates scraper.fetch() → validate → save, handles quarantine, logs CollectionRun)
-- [ ] T021 [US1] Implement IndicatorCard NiceGUI component in infrastructure/ui/components/indicator_card.py (name, value+unit, change_absolute, change_pct, measured_at, category color coding)
-- [ ] T022 [US1] Implement dashboard page in infrastructure/ui/pages/dashboard.py (grid of IndicatorCards, calls GetCurrentIndicators use case, empty-state when no data)
-- [ ] T023 [US1] Wire up NiceGUI app in infrastructure/ui/app.py (register pages, configure title, port from env, serve dashboard.py)
-- [ ] T024 [US1] Compose dependencies in main.py (instantiate SQLite repos → inject into use cases → inject into UI → start scheduler if not --no-scheduler)
+- [x] T017 [US1] Implement GetCurrentIndicators use case in application/use_cases/get_current_indicators.py (calls indicator_repository.get_all_latest(), filters quarantined)
+- [x] T018 [P] [US1] Implement BanrepScraper in adapters/scrapers/banrep_scraper.py (TRM diaria + Tasa de Referencia, robots.txt check, rate_limit_seconds=2.0)
+- [x] T019 [P] [US1] Implement DaneScraper in adapters/scrapers/dane_scraper.py (IPC mensual + Tasa de Desempleo mensual + PIB trimestral)
+- [x] T020 [US1] Implement UpdateSourceData use case in application/use_cases/update_source_data.py (orchestrates scraper.fetch() → validate → save, handles quarantine, logs CollectionRun)
+- [x] T021 [US1] Implement IndicatorCard NiceGUI component in infrastructure/ui/components/indicator_card.py (name, value+unit, change_absolute, change_pct, measured_at, category color coding)
+- [x] T022 [US1] Implement dashboard page in infrastructure/ui/pages/dashboard.py (grid of IndicatorCards, calls GetCurrentIndicators use case, empty-state when no data)
+- [x] T023 [US1] Wire up NiceGUI app in infrastructure/ui/app.py (register pages, configure title, port from env, serve dashboard.py)
+- [x] T024 [US1] Compose dependencies in main.py (instantiate SQLite repos → inject into use cases → inject into UI → start scheduler if not --no-scheduler)
 
 **Checkpoint**: MVP funcional — dashboard con 5 indicadores visible en local ✓
 
@@ -79,10 +79,10 @@ variación y fecha visible en `http://localhost:8080`
 **Independent Test**: Clic en cualquier tarjeta de indicador → gráfica con
 al menos 2 puntos de datos y selector de rango temporal funcionando.
 
-- [ ] T025 [US2] Implement GetIndicatorHistory use case in application/use_cases/get_indicator_history.py (calls indicator_repository.get_history(name, from_date, to_date))
-- [ ] T026 [US2] Implement HistoryChart NiceGUI component in infrastructure/ui/components/history_chart.py (ui.echart() with time-series line chart, tooltip with value+date, responsive)
-- [ ] T027 [US2] Add time range selector (3m / 6m / 12m toggle) to history view in infrastructure/ui/components/history_chart.py
-- [ ] T028 [US2] Add click handler on IndicatorCard to open history dialog in infrastructure/ui/pages/dashboard.py (passes indicator name to HistoryChart, handles no-data gracefully)
+- [x] T025 [US2] Implement GetIndicatorHistory use case in application/use_cases/get_indicator_history.py (calls indicator_repository.get_history(name, from_date, to_date))
+- [x] T026 [US2] Implement HistoryChart NiceGUI component in infrastructure/ui/components/history_chart.py (ui.echart() with time-series line chart, tooltip with value+date, responsive)
+- [x] T027 [US2] Add time range selector (3m / 6m / 12m toggle) to history view in infrastructure/ui/components/history_chart.py
+- [x] T028 [US2] Add click handler on IndicatorCard to open history dialog in infrastructure/ui/pages/dashboard.py (passes indicator name to HistoryChart, handles no-data gracefully)
 
 **Checkpoint**: Tendencia histórica funcionando desde cualquier tarjeta ✓
 
@@ -96,9 +96,9 @@ acceder directamente al recurso de origen.
 **Independent Test**: Clic en ícono de fuente en cualquier tarjeta → panel
 con nombre del organismo y enlace clickeable al recurso original.
 
-- [ ] T029 [US3] Add source attribution section to IndicatorCard component in infrastructure/ui/components/indicator_card.py (source name badge, info icon)
-- [ ] T030 [US3] Implement SourceDetail component in infrastructure/ui/components/source_detail.py (source name, source_type label, base_url as clickable link, last_successful_run)
-- [ ] T031 [US3] Wire SourceDetail panel/dialog into dashboard page in infrastructure/ui/pages/dashboard.py (opens on info icon click, receives source_id, calls SourceRepository.get_by_id)
+- [x] T029 [US3] Add source attribution section to IndicatorCard component in infrastructure/ui/components/indicator_card.py (source name badge, info icon)
+- [x] T030 [US3] Implement SourceDetail component in infrastructure/ui/components/source_detail.py (source name, source_type label, base_url as clickable link, last_successful_run)
+- [x] T031 [US3] Wire SourceDetail panel/dialog into dashboard page in infrastructure/ui/pages/dashboard.py (opens on info icon click, receives source_id, calls SourceRepository.get_by_id)
 
 **Checkpoint**: Toda información tiene fuente verificable y enlace directo ✓
 
@@ -112,10 +112,10 @@ y si hubo errores recientes.
 **Independent Test**: Panel de estado muestra timestamp de última ejecución
 exitosa y alerta visible cuando una fuente falló.
 
-- [ ] T032 [US4] Implement GetCollectionStatus use case in application/use_cases/get_collection_status.py (returns list of sources with last_run_status, last_successful_run, last_error)
-- [ ] T033 [US4] Implement APScheduler job scheduler in infrastructure/scheduler/job_scheduler.py (BackgroundScheduler, one job per active source, frequency from source.update_frequency, resilient — fallo individual no detiene los demás)
-- [ ] T034 [US4] Implement CollectionStatus NiceGUI component in infrastructure/ui/components/collection_status.py (table/list of sources, status badge SUCCESS/FAILED/RUNNING, last update timestamp, error tooltip)
-- [ ] T035 [US4] Integrate CollectionStatus panel into dashboard page in infrastructure/ui/pages/dashboard.py (footer or sidebar section, manual refresh button calls UpdateSourceData)
+- [x] T032 [US4] Implement GetCollectionStatus use case in application/use_cases/get_collection_status.py (returns list of sources with last_run_status, last_successful_run, last_error)
+- [x] T033 [US4] Implement APScheduler job scheduler in infrastructure/scheduler/job_scheduler.py (BackgroundScheduler, one job per active source, frequency from source.update_frequency, resilient — fallo individual no detiene los demás)
+- [x] T034 [US4] Implement CollectionStatus NiceGUI component in infrastructure/ui/components/collection_status.py (table/list of sources, status badge SUCCESS/FAILED/RUNNING, last update timestamp, error tooltip)
+- [x] T035 [US4] Integrate CollectionStatus panel into dashboard page in infrastructure/ui/pages/dashboard.py (footer or sidebar section, manual refresh button calls UpdateSourceData)
 
 **Checkpoint**: Observatorio totalmente funcional con estado de salud visible ✓
 
@@ -125,10 +125,10 @@ exitosa y alerta visible cuando una fuente falló.
 
 **Purpose**: Completitud, robustez y calidad final
 
-- [ ] T036 [P] Implement MinHaciendaScraper stub in adapters/scrapers/minhacienda_scraper.py (estructura completa, fetch() lanza NotImplementedError con TODO, source registrada como inactive)
-- [ ] T037 [P] Implement DashboardPresenter in adapters/presenters/dashboard_presenter.py (formatea Decimal → string con separadores, colorea variaciones positivas/negativas, formatea fechas en español)
-- [ ] T038 [P] Add domain error classes to domain/errors.py (DomainError, DuplicateMeasurementError, SourceNotFoundError, ValidationError, QuarantineError, ScraperError hierarchy)
-- [ ] T039 Validate quickstart.md end-to-end: ejecutar todos los comandos documentados y confirmar que funcionan en entorno limpio
+- [x] T036 [P] Implement MinHaciendaScraper stub in adapters/scrapers/minhacienda_scraper.py (estructura completa, fetch() lanza NotImplementedError con TODO, source registrada como inactive)
+- [x] T037 [P] Implement DashboardPresenter in adapters/presenters/dashboard_presenter.py (formatea Decimal → string con separadores, colorea variaciones positivas/negativas, formatea fechas en español)
+- [x] T038 [P] Add domain error classes to domain/errors.py (DomainError, DuplicateMeasurementError, SourceNotFoundError, ValidationError, QuarantineError, ScraperError hierarchy)
+- [x] T039 Validate quickstart.md end-to-end: ejecutar todos los comandos documentados y confirmar que funcionan en entorno limpio
 
 ---
 
