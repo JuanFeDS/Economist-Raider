@@ -1,0 +1,90 @@
+NBER WORKING PAPER SERIES
+DO INSTITUTIONS CAUSE GROWTH?
+Edward L. Glaeser
+Rafael La Porta
+Florencio Lopez-de-Silanes
+Andrei Shleifer
+Working Paper 10568
+http://www.nber.org/papers/w10568
+NATIONAL BUREAU OF ECONOMIC RESEARCH
+1050 Massachusetts Avenue
+Cambridge, MA 02138
+June 2004
+We thank Philippe Aghion, Olivier Blanchard, Oded Galor, Simon Johnson, Aart Kraay, Ross Levine,
+Torsten Persson, Dani Rodrik and an anonymous referee for helpful comments, and Sebastian Brown for
+research assistance.  The views expressed herein are those of the author(s) and not necessarily those of the
+National Bureau of Economic Research.
+©2004 by Edward L. Glaeser, Rafael La Porta, Florencio Lopez-de-Silanes, and Andrei Shleifer.  All rights
+reserved. Short sections of text, not to exceed two paragraphs, may be quoted without explicit permission
+provided that full credit, including © notice, is given to the source.
+
+Do Institutions Cause Growth?
+Edward L. Glaeser, Rafael La Porta, Florencio Lopez-de-Silanes, and Andrei Shleifer
+NBER Working Paper No. 10568
+June 2004
+JEL No. O11, O40
+ABSTRACT
+We revisit the debate over whether political institutions cause economic growth, or whether,
+alternatively, growth and human capital accumulation lead to institutional improvement. We find
+that most indicators of institutional quality used to establish the proposition that institutions cause
+growth are constructed to be conceptually unsuitable for that purpose. We also find that some of the
+instrumental variable techniques used in the literature are flawed. Basic OLS results, as well as a
+variety of additional evidence, suggest that a) human capital is a more basic source of growth than
+are the institutions, b) poor countries get out of poverty through good policies, often pursued by
+dictators, and c) subsequently improve their political institutions.
+Edward L. Glaeser
+Department of Economics
+Harvard University
+315A Littauer Center
+Cambridge, MA 02138
+and NBER
+eglaeser@harvard.edu
+Rafael La Porta
+Tuck School of Business
+Dartmouth College
+314 Woodbury 
+Hanover, NH 03755
+and NBER
+rafael.laporta@dartmouth.edu
+Florencio Lopez-de-Silanes
+Yale School of Management
+135 Prospect Street
+P.O. Box 208200
+New Haven, CT 06517
+and NBER
+florencio.lopezdesilanes@yale.edu
+Andrei Shleifer
+Department of Economics
+Harvard University
+M9 Littauer Center
+Cambridge, MA 02138
+and NBER
+ashleifer@harvard.edu
+
+2
+I. Introduction. 
+  
+ 
+Today, both the U.S. and the international community face two major development 
+challenges around the world, from Iraq, to Haiti, to sub-Saharan Africa: how to ignite growth and 
+how to establish democracy.   Economic research has identified two broad approaches to 
+confronting these challenges.   The first approach emphasizes the need to start with democracy 
+and other checks on government as the mechanisms for securing property rights.   With such 
+political institutions in place, investment in human and physical capital, and therefore economic 
+growth, are expected to follow.   The second approach emphasizes the need for human and 
+physical capital accumulation to start the process.  It holds that even pro-market dictators can 
+secure property rights as a matter of policy choice, not of political constraints.   From the vantage 
+point of poor countries, it sees democracy and other institutional improvements as the 
+consequences of increased education and wealth, not as their causes.   
+ 
+Both approaches to development have extensive intellectual pedigree.  The importance of 
+constraining government was stressed by Montesquieu (1748) and Smith (1776), as well by the 
+new institutional economics literature (Buchanan and Tullock 1962, North and Thomas 1973, 
+North 1981, 1990).   DeLong and Shleifer (1993) supplied early empirical support for this view 
+using data on urbanization of European regions during the last millennium, which showed faster 
+city growth under more limited governments.   More recently, the literature on economic growth, 
+starting with early contributions by Knack and Keefer (1995) and Mauro (1995), has turned to the 
+effects of good institutions on economic growth.   It is fair to say that recent work, including Hall 
+and Jones (1999), Acemoglu, Johnson and Robinson (2001, 2002), Easterly and Levine (2003), 
+Dollar and Kraay (2003), and Rodrik, Subramanian, and Trebbi (2002), has reached close to an 
+intellectual consensus that the political institutions of limited government cause economic growth.

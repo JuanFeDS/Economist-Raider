@@ -1,0 +1,90 @@
+NBER WORKING PAPER SERIES
+¿Hacen las INSTITUCIONES GROWTH?
+Edward L. Glaeser
+Rafael La Porta
+Florencio López-de-Silanes
+Andrei Shleifer
+Documento de trabajo 10568
+http://www.nber.org/papers/w10568
+NATIONAL BUREAU OF ECONOMIC RESEARCH
+1050 Massachusetts Avenue
+Cambridge, MA 02138
+Junio de 2004
+Agradecemos a Philippe Aghion, Olivier Blanchard, Oded Galor, Simon Johnson, Aart Kraay, Ross Levine,
+Torsten Persson, Dani Rodrik y un árbitro anónimo para comentarios útiles, y Sebastian Brown para
+asistencia de investigación. Las opiniones expresadas en este documento son las del autor o de los autores y no necesariamente las del autor
+National Bureau of Economic Research.
+©2004 por Edward L. Glaeser, Rafael La Porta, Florencio López-de-Silanes, y Andrei Shleifer. Todos los derechos
+reservado. Es posible citar breves secciones de texto, que no excedan de dos párrafos, sin autorización explícita
+siempre que el crédito completo, incluyendo © aviso, se da a la fuente.
+
+¿Causan el crecimiento las instituciones?
+Edward L. Glaeser, Rafael La Porta, Florencio López-de-Silanes, and Andrei Shleifer
+NBER Working Paper No. 10568
+Junio de 2004
+JEL No. O11, O40
+ABSTRACT
+Revisitamos el debate sobre si las instituciones políticas causan crecimiento económico, o si,
+alternativamente, el crecimiento y la acumulación de capital humano conducen a la mejora institucional. Encontramos
+que la mayoría de los indicadores de calidad institucional utilizaban para establecer la propuesta de que las instituciones causaran
+El crecimiento se construye para ser conceptualmente inadecuado con ese fin. También encontramos que algunos de los
+Las técnicas variables instrumentales utilizadas en la literatura son defectuosas. Resultados básicos de la OLS, así como un
+variedad de pruebas adicionales, sugieren que a) el capital humano es una fuente de crecimiento más básica que
+son las instituciones, b) los países pobres salen de la pobreza a través de buenas políticas, a menudo perseguidos por
+dictadores, y c) posteriormente mejorar sus instituciones políticas.
+Edward L. Glaeser
+Department of Economics
+Harvard University
+315A Littauer Center
+Cambridge, MA 02138
+y NBER
+eglaeser@harvard.edu
+Rafael La Porta
+Tuck School of Business
+Dartmouth College
+314 Woodbury
+Hanover, NH 03755
+y NBER
+rafael.laporta@dartmouth.edu
+Florencio López-de-Silanes
+Yale School of Management
+135 Prospect Street
+P.O. Box 208200
+New Haven, CT 06517
+y NBER
+florencio.lopezdesilanes@yale.edu
+Andrei Shleifer
+Department of Economics
+Harvard University
+M9 Littauer Center
+Cambridge, MA 02138
+y NBER
+ashleifer@harvard.edu
+
+2
+I. Introducción.
+
+
+Hoy, tanto Estados Unidos como la comunidad internacional enfrentan dos grandes desarrollos
+desafíos en todo el mundo, desde Irak, Haití, hasta África subsahariana: cómo encender el crecimiento y
+cómo establecer la democracia. La investigación económica ha determinado dos enfoques amplios
+enfrentar estos desafíos. El primer enfoque subraya la necesidad de comenzar con la democracia
+y otros controles sobre el gobierno como mecanismos para garantizar los derechos de propiedad. Con tal
+instituciones políticas en vigor, inversiones en capital humano y físico, y por consiguiente económicas
+Se espera que el crecimiento siga. El segundo enfoque pone de relieve la necesidad de
+acumulación de capital físico para iniciar el proceso. Sostiene que incluso los dictadores de mercado pueden
+garantizar los derechos de propiedad como cuestión de elección de políticas, no de limitaciones políticas. Desde el escenario
+punto de los países pobres, considera la democracia y otras mejoras institucionales como el
+consecuencias del aumento de la educación y la riqueza, no como sus causas.
+
+Ambos enfoques del desarrollo tienen un amplio grado intelectual. La importancia de
+el gobierno restringido fue subrayado por Montesquieu (1748) y Smith (1776), así como por el
+nueva literatura económica institucional (Buchanan y Tullock 1962, Norte y Thomas 1973,
+Norte de 1981, 1990). DeLong y Shleifer (1993) proporcionaron apoyo empírico temprano para esta opinión
+utilizando datos sobre la urbanización de las regiones europeas durante el último milenio, que mostraron mayor rapidez
+crecimiento urbano bajo gobiernos más limitados. Más recientemente, la literatura sobre crecimiento económico,
+empezando por las contribuciones tempranas de Knack y Keefer (1995) y Mauro (1995), se ha convertido en
+efectos de las buenas instituciones en el crecimiento económico. Es justo decir que el trabajo reciente, incluyendo Hall
+and Jones (1999), Acemoglu, Johnson and Robinson (2001, 2002), Easterly and Levine (2003),
+Dollar and Kraay (2003), and Rodrik, Subramanian, and Trebbi (2002), has reached close to an
+consenso intelectual de que las instituciones políticas de gobierno limitado causan crecimiento económico.

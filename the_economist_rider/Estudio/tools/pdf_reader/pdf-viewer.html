@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visor de PDF</title>
+<script src="pdf.min.js"></script>
+<style>
+  :root {
+    --bg: #1e1e1e;
+    --panel: #2a2a2a;
+    --border: #3d3d3d;
+    --text: #e6e6e6;
+    --accent: #4a9eff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  #toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  #toolbar button {
+    background: #3a3a3a;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  #toolbar button:hover { background: #454545; }
+  #toolbar button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .file-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 14px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .file-btn:hover { background: #2f8ce6; }
+  .file-btn:active { transform: scale(0.97); }
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  #pageInfo { font-size: 14px; white-space: nowrap; }
+  #fileName { font-size: 13px; color: #999; margin-left: auto; }
+  #viewerWrap {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+  }
+  .pageWrap {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    background: white;
+    line-height: 0;
+  }
+  #dropZone {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #777;
+    font-size: 16px;
+    border: 2px dashed var(--border);
+    margin: 24px;
+    border-radius: 12px;
+  }
+  #dropZone.dragover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <label for="fileInput" class="file-btn">📄 Seleccionar archivo</label>
+  <input type="file" id="fileInput" accept="application/pdf" class="visually-hidden">
+  <button id="prevPage" disabled>&larr; Anterior</button>
+  <span id="pageInfo">-</span>
+  <button id="nextPage" disabled>Siguiente &rarr;</button>
+  <button id="zoomOut" disabled>-</button>
+  <span id="zoomLevel">100%</span>
+  <button id="zoomIn" disabled>+</button>
+  <span id="fileName"></span>
+</div>
+
+<div id="dropZone">Arrastrá un PDF acá o usá el selector de arriba</div>
+<div id="viewerWrap" style="display:none"></div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "pdf.worker.min.js";
+
+const fileInput = document.getElementById('fileInput');
+const dropZone = document.getElementById('dropZone');
+const viewerWrap = document.getElementById('viewerWrap');
+const prevBtn = document.getElementById('prevPage');
+const nextBtn = document.getElementById('nextPage');
+const zoomInBtn = document.getElementById('zoomIn');
+const zoomOutBtn = document.getElementById('zoomOut');
+const pageInfo = document.getElementById('pageInfo');
+const zoomLevel = document.getElementById('zoomLevel');
+const fileNameLabel = document.getElementById('fileName');
+
+let pdfDoc = null;
+let scale = 1.5;
+let currentPage = 1;
+let pageObserver = null;
+
+function renderAllPages() {
+  viewerWrap.innerHTML = '';
+  if (pageObserver) pageObserver.disconnect();
+
+  pageObserver = new IntersectionObserver(entries => {
+    const visible = entries.filter(e => e.isIntersecting);
+    if (visible.length === 0) return;
+    visible.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+    currentPage = Number(visible[0].target.dataset.pageNumber);
+    updatePageInfo();
+  }, { root: viewerWrap, threshold: [0.25, 0.5, 0.75] });
+
+  const renderJobs = [];
+  for (let num = 1; num <= pdfDoc.numPages; num++) {
+    renderJobs.push(
+      pdfDoc.getPage(num).then(page => {
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'pageWrap';
+        wrap.dataset.pageNumber = num;
+        wrap.appendChild(canvas);
+        viewerWrap.appendChild(wrap);
+        pageObserver.observe(wrap);
+
+        return page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+      })
+    );
+  }
+  return Promise.all(renderJobs);
+}
+
+function updatePageInfo() {
+  pageInfo.textContent = `Página ${currentPage} de ${pdfDoc.numPages}`;
+  zoomLevel.textContent = `${Math.round(scale / 1.5 * 100)}%`;
+  prevBtn.disabled = currentPage <= 1;
+  nextBtn.disabled = currentPage >= pdfDoc.numPages;
+}
+
+function goToPage(num) {
+  const target = viewerWrap.querySelector(`[data-page-number="${num}"]`);
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function loadPdf(arrayBuffer, name) {
+  pdfjsLib.getDocument({ data: arrayBuffer }).promise.then(doc => {
+    pdfDoc = doc;
+    currentPage = 1;
+    dropZone.style.display = 'none';
+    viewerWrap.style.display = 'flex';
+    fileNameLabel.textContent = name;
+    zoomInBtn.disabled = false;
+    zoomOutBtn.disabled = false;
+    renderAllPages().then(updatePageInfo);
+  }).catch(err => {
+    alert('No se pudo abrir el PDF: ' + err.message);
+  });
+}
+
+function handleFile(file) {
+  if (!file || file.type !== 'application/pdf') {
+    alert('Seleccioná un archivo PDF válido.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => loadPdf(new Uint8Array(e.target.result), file.name);
+  reader.readAsArrayBuffer(file);
+}
+
+fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+
+['dragenter', 'dragover'].forEach(evt =>
+  dropZone.addEventListener(evt, e => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+  })
+);
+['dragleave', 'drop'].forEach(evt =>
+  dropZone.addEventListener(evt, e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+  })
+);
+dropZone.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
+
+prevBtn.addEventListener('click', () => {
+  if (currentPage <= 1) return;
+  goToPage(currentPage - 1);
+});
+nextBtn.addEventListener('click', () => {
+  if (currentPage >= pdfDoc.numPages) return;
+  goToPage(currentPage + 1);
+});
+zoomInBtn.addEventListener('click', () => {
+  scale = Math.min(scale + 0.25, 4);
+  renderAllPages().then(() => goToPage(currentPage));
+});
+zoomOutBtn.addEventListener('click', () => {
+  scale = Math.max(scale - 0.25, 0.5);
+  renderAllPages().then(() => goToPage(currentPage));
+});
+</script>
+
+</body>
+</html>
